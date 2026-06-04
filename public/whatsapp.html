@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexTax — WhatsApp Notification Centre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@300;400;500;600&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ─────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1f35;
+  --navy-mid:#162d4a;
+  --navy-light:#1e3d5e;
+  --gold:#c9a84c;
+  --gold-light:#e0c06a;
+  --gold-pale:#f5ead9;
+  --cream:#faf8f4;
+  --parchment:#f0ead8;
+  --text:#1a1a2e;
+  --text-muted:#5c6b80;
+  --border:#ddd5c0;
+  --white:#ffffff;
+  --red:#c0392b;
+  --green:#1a6b3a;
+  --wa-green:#25D366;
+  --wa-dark:#128C7E;
+  --wa-light:#DCF8C6;
+  --shadow:0 4px 24px rgba(13,31,53,.12);
+  --shadow-lg:0 12px 48px rgba(13,31,53,.2);
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:'Source Sans 3',sans-serif;
+  background:var(--cream);
+  color:var(--text);
+  min-height:100vh;
+}
+
+/* ── TOP BAR ──────────────────────────────────────────── */
+.topBar{
+  background:var(--navy);
+  padding:0 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+  position:sticky;top:0;z-index:100;
+}
+.topBarLogo{
+  font-family:'Playfair Display',serif;
+  font-size:1.35rem;font-weight:700;color:var(--white);
+  letter-spacing:-.3px;display:flex;align-items:center;gap:10px;
+}
+.topBarLogo .dot{
+  width:8px;height:8px;border-radius:50%;background:var(--gold);
+  box-shadow:0 0 8px var(--gold);
+}
+.waIndicator{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(37,211,102,.12);
+  border:1px solid rgba(37,211,102,.3);
+  padding:5px 14px;border-radius:20px;
+  font-size:.78rem;font-weight:600;letter-spacing:.5px;color:var(--wa-green);
+}
+.waIndicator::before{
+  content:'';width:7px;height:7px;border-radius:50%;
+  background:var(--wa-green);
+  box-shadow:0 0 6px var(--wa-green);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.layout{
+  display:grid;
+  grid-template-columns:280px 1fr;
+  min-height:calc(100vh - 64px);
+}
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar{
+  background:var(--navy-mid);
+  padding:24px 0;
+  border-right:1px solid rgba(255,255,255,.06);
+}
+.sidebarLabel{
+  font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(255,255,255,.3);padding:0 20px;margin-bottom:10px;margin-top:20px;
+}
+.sidebarLabel:first-child{margin-top:0}
+.navItem{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 20px;
+  cursor:pointer;color:rgba(255,255,255,.65);
+  font-size:.875rem;font-weight:500;
+  transition:all .2s;
+  border-left:3px solid transparent;
+}
+.navItem:hover{background:rgba(255,255,255,.07);color:var(--white)}
+.navItem.active{
+  background:rgba(201,168,76,.12);
+  color:var(--gold-light);
+  border-left-color:var(--gold);
+}
+.navItem .navIcon{font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.navBadge{
+  margin-left:auto;background:var(--wa-green);color:#fff;
+  font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:10px;
+}
+
+/* ── MAIN CONTENT ─────────────────────────────────────── */
+.main{padding:36px 40px;background:var(--cream)}
+
+/* ── PAGE HEADER ─────────────────────────────────────── */
+.pageHeader{
+  margin-bottom:32px;padding-bottom:20px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-end;justify-content:space-between;
+}
+.pageTitle{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--navy)}
+.pageSubtitle{font-size:.82rem;color:var(--text-muted);margin-top:4px}
+
+/* ── PANEL ───────────────────────────────────────────── */
+.panel{
+  background:var(--white);border-radius:4px;
+  box-shadow:var(--shadow);margin-bottom:24px;
+  overflow:hidden;
+}
+.panelHead{
+  padding:16px 22px;
+  border-bottom:1px solid var(--parchment);
+  display:flex;align-items:center;justify-content:space-between;
+  background:linear-gradient(135deg,var(--white) 0%,var(--cream) 100%);
+}
+.panelTitle{
+  font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;color:var(--navy);
+  display:flex;align-items:center;gap:10px;
+}
+.panelTitle::before{
+  content:'';width:3px;height:18px;background:var(--gold);border-radius:2px;flex-shrink:0;
+}
+.panelBody{padding:22px}
+
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn{
+  padding:9px 20px;border:none;border-radius:3px;
+  font-family:'Source Sans 3',sans-serif;font-size:.85rem;font-weight:600;
+  cursor:pointer;transition:all .2s;letter-spacing:.3px;
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+}
+.btn-navy{background:var(--navy);color:var(--white)}
+.btn-navy:hover{background:var(--navy-light)}
+.btn-gold{background:var(--gold);color:var(--navy)}
+.btn-gold:hover{background:var(--gold-light)}
+.btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--border)}
+.btn-outline:hover{border-color:var(--navy);background:var(--cream)}
+.btn-wa{background:var(--wa-green);color:#fff}
+.btn-wa:hover{background:var(--wa-dark)}
+.btn-sm{padding:6px 13px;font-size:.78rem}
+.btn-danger{background:transparent;color:var(--red);border:1.5px solid rgba(192,57,43,.3)}
+.btn-danger:hover{background:rgba(192,57,43,.08)}
+.btn-green{background:var(--green);color:var(--white)}
+.btn-green:hover{background:#1d7e44}
+
+/* ── FORM ─────────────────────────────────────────────── */
+.formGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{
+  font-size:.75rem;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--text-muted);
+}
+.field input,.field select,.field textarea{
+  padding:9px 13px;
+  border:1.5px solid var(--border);border-radius:3px;
+  font-family:'Source Sans 3',sans-serif;font-size:.9rem;color:var(--text);
+  background:var(--cream);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--gold);background:var(--white);
+  box-shadow:0 0 0 3px rgba(201,168,76,.12);
+}
+.field textarea{resize:vertical;min-height:80px;font-size:.88rem;line-height:1.6}
+
+/* ── TABLE ───────────────────────────────────────────── */
+.tableWrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+thead th{
+  padding:10px 16px;text-align:left;
+  font-size:.72rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);background:var(--parchment);
+  border-bottom:2px solid var(--border);
+}
+tbody tr{border-bottom:1px solid var(--parchment);transition:background .15s}
+tbody tr:hover{background:rgba(201,168,76,.04)}
+tbody td{padding:11px 16px;font-size:.88rem;color:var(--text)}
+.badge{
+  display:inline-block;padding:3px 10px;border-radius:2px;
+  font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+}
+.badge-green{background:rgba(26,107,58,.1);color:var(--green)}
+.badge-red{background:rgba(192,57,43,.1);color:var(--red)}
+.badge-gold{background:rgba(201,168,76,.15);color:#9a7028}
+.badge-navy{background:rgba(13,31,53,.08);color:var(--navy)}
+.badge-wa{background:rgba(37,211,102,.15);color:#128C7E}
+.badge-orange{background:rgba(230,126,34,.12);color:#c86414}
+
+/* ── PAGES ───────────────────────────────────────────── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── MODAL ───────────────────────────────────────────── */
+.modal{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(13,31,53,.55);backdrop-filter:blur(3px);
+  align-items:center;justify-content:center;
+  animation:fadeIn .15s ease;
+}
+.modal.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modalBox{
+  background:var(--white);border-radius:4px;
+  box-shadow:var(--shadow-lg);width:640px;max-width:95vw;
+  max-height:90vh;overflow-y:auto;border-top:3px solid var(--gold);
+  animation:slideUp .2s ease;
+}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modalHead{
+  padding:18px 24px;border-bottom:1px solid var(--parchment);
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;color:var(--navy);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modalClose{
+  background:none;border:none;cursor:pointer;font-size:1.1rem;
+  color:var(--text-muted);transition:color .2s;padding:2px 6px;border-radius:2px;
+}
+.modalClose:hover{color:var(--red);background:rgba(192,57,43,.08)}
+.modalBody{padding:22px 24px}
+.modalFoot{
+  padding:16px 24px;border-top:1px solid var(--parchment);
+  display:flex;justify-content:flex-end;gap:10px;
+  background:var(--cream);
+}
+
+/* ── TEMPLATE BUILDER ────────────────────────────────── */
+.templateBox{
+  background:var(--cream);border:1.5px solid var(--border);
+  border-radius:4px;padding:16px;margin-bottom:16px;
+  position:relative;transition:border-color .2s;
+}
+.templateBox:hover{border-color:var(--gold)}
+.templateMeta{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.templateName{
+  font-family:'Playfair Display',serif;font-weight:600;color:var(--navy);font-size:1rem;flex:1;
+}
+.templateCategory{
+  font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:3px 9px;border-radius:2px;
+}
+.cat-deadline{background:rgba(192,57,43,.1);color:var(--red)}
+.cat-invoice{background:rgba(26,107,58,.1);color:var(--green)}
+.cat-case{background:rgba(13,31,53,.08);color:var(--navy)}
+.cat-fbr{background:rgba(201,168,76,.15);color:#9a7028}
+.cat-general{background:rgba(90,50,140,.1);color:#5a328c}
+.cat-reminder{background:rgba(230,126,34,.12);color:#c86414}
+.templatePreview{
+  font-size:.85rem;color:var(--text-muted);line-height:1.6;
+  border-left:3px solid var(--gold-pale);padding-left:12px;
+  white-space:pre-wrap;word-break:break-word;
+}
+.templateActions{margin-top:12px;display:flex;gap:8px}
+
+/* ── WA PREVIEW BUBBLE ──────────────────────────────── */
+.waBubbleWrap{
+  background:#e5ddd5;
+  background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c0b8ae' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  border-radius:8px;padding:20px;min-height:200px;
+}
+.waBubble{
+  background:var(--wa-light);
+  border-radius:8px 8px 8px 0;
+  padding:12px 16px;
+  max-width:85%;
+  box-shadow:0 1px 2px rgba(0,0,0,.15);
+  font-family:'Source Sans 3',sans-serif;
+  font-size:.9rem;line-height:1.6;color:#1a1a1a;
+  white-space:pre-wrap;word-break:break-word;
+  position:relative;
+}
+.waBubble::before{
+  content:'';position:absolute;left:-8px;bottom:0;
+  border-right:8px solid var(--wa-light);
+  border-top:8px solid transparent;
+}
+.waBubbleTime{
+  text-align:right;font-size:.7rem;color:#8da;
+  margin-top:4px;
+}
+.waHeader{
+  display:flex;align-items:center;gap:10px;
+  background:var(--wa-dark);padding:10px 16px;border-radius:8px 8px 0 0;color:#fff;
+  font-size:.85rem;font-weight:600;
+}
+.waAvatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--wa-green);display:flex;align-items:center;justify-content:center;
+  font-size:1rem;font-weight:700;flex-shrink:0;
+}
+
+/* ── VARIABLE CHIPS ──────────────────────────────────── */
+.varChips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.varChip{
+  padding:4px 10px;border-radius:12px;
+  background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);
+  font-size:.75rem;font-family:'Courier Prime',monospace;color:#9a7028;
+  cursor:pointer;transition:all .18s;user-select:none;
+}
+.varChip:hover{background:rgba(201,168,76,.25);border-color:var(--gold)}
+
+/* ── RECIPIENT LIST ──────────────────────────────────── */
+.recipientItem{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 14px;
+  border:1.5px solid var(--border);border-radius:3px;
+  margin-bottom:8px;background:var(--white);
+  transition:border-color .2s;
+}
+.recipientItem:hover{border-color:var(--gold)}
+.recipientAvatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--navy),var(--navy-light));
+  display:flex;align-items:center;justify-content:center;
+  color:var(--gold-light);font-weight:700;font-size:.85rem;flex-shrink:0;
+}
+.recipientInfo{flex:1;min-width:0}
+.recipientName{font-weight:600;color:var(--navy);font-size:.9rem}
+.recipientPhone{font-size:.8rem;color:var(--text-muted);font-family:'Courier Prime',monospace}
+.recipientCheck{
+  width:18px;height:18px;border-radius:3px;border:2px solid var(--border);
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.recipientCheck.checked{
+  background:var(--wa-green);border-color:var(--wa-green);color:#fff;
+}
+
+/* ── SCHEDULE SECTION ────────────────────────────────── */
+.scheduleCard{
+  background:var(--white);border:1.5px solid var(--border);border-radius:4px;
+  padding:16px 18px;margin-bottom:12px;
+  display:flex;align-items:center;gap:16px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.scheduleCard:hover{border-color:var(--gold);box-shadow:var(--shadow)}
+.scheduleIcon{
+  width:44px;height:44px;border-radius:8px;
+  background:linear-gradient(135deg,rgba(37,211,102,.1),rgba(18,140,126,.1));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.3rem;flex-shrink:0;
+}
+.scheduleInfo{flex:1}
+.scheduleName{font-weight:600;color:var(--navy);font-size:.92rem}
+.scheduleMeta{font-size:.78rem;color:var(--text-muted);margin-top:2px}
+.scheduleToggle{
+  position:relative;width:44px;height:24px;flex-shrink:0;
+}
+.scheduleToggle input{opacity:0;width:0;height:0;position:absolute}
+.toggleSlider{
+  position:absolute;inset:0;border-radius:24px;
+  background:var(--border);cursor:pointer;transition:.3s;
+}
+.toggleSlider::before{
+  content:'';position:absolute;height:18px;width:18px;
+  left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+.scheduleToggle input:checked+.toggleSlider{background:var(--wa-green)}
+.scheduleToggle input:checked+.toggleSlider::before{transform:translateX(20px)}
+
+/* ── LOG ─────────────────────────────────────────────── */
+.logEntry{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:12px 0;border-bottom:1px solid var(--parchment);
+}
+.logEntry:last-child{border-bottom:none}
+.logIcon{font-size:1.1rem;margin-top:2px;flex-shrink:0}
+.logInfo{flex:1}
+.logTitle{font-weight:600;color:var(--navy);font-size:.88rem}
+.logMeta{font-size:.78rem;color:var(--text-muted);margin-top:2px}
+.logStatus{flex-shrink:0}
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:9999;
+  background:var(--navy);color:var(--white);
+  padding:13px 20px;border-radius:4px;font-size:.85rem;font-weight:500;
+  box-shadow:var(--shadow-lg);opacity:0;transform:translateY(8px);
+  transition:all .25s;pointer-events:none;max-width:320px;
+  border-left:3px solid var(--gold);
+}
+.toast.show{opacity:1;transform:none}
+.toast.wa{border-left-color:var(--wa-green)}
+
+/* ── STATS GRID ──────────────────────────────────────── */
+.statsGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.statCard{
+  background:var(--white);border-radius:4px;padding:20px 22px;
+  box-shadow:var(--shadow);border-left:3px solid transparent;
+  position:relative;overflow:hidden;
+}
+.statCard.wa-card{border-left-color:var(--wa-green)}
+.statCard.gold{border-left-color:var(--gold)}
+.statCard.navy{border-left-color:var(--navy)}
+.statCard.red{border-left-color:var(--red)}
+.statValue{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:var(--navy)}
+.statLabel{font-size:.73rem;font-weight:600;letter-spacing:.7px;text-transform:uppercase;color:var(--text-muted);margin-top:3px}
+.statCard::after{
+  content:attr(data-icon);position:absolute;right:14px;bottom:8px;
+  font-size:2.6rem;opacity:.06;line-height:1;
+}
+
+/* ── SEARCH ──────────────────────────────────────────── */
+.searchBar{position:relative;margin-bottom:16px}
+.searchBar input{
+  width:100%;padding:9px 13px 9px 36px;
+  border:1.5px solid var(--border);border-radius:3px;
+  font-family:'Source Sans 3',sans-serif;font-size:.88rem;
+  background:var(--cream);color:var(--text);outline:none;
+  transition:border-color .2s;
+}
+.searchBar input:focus{border-color:var(--gold)}
+.searchBar::before{
+  content:'🔍';position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  font-size:.82rem;opacity:.45;pointer-events:none;
+}
+
+/* ── EMPTY STATE ─────────────────────────────────────── */
+.emptyState{
+  text-align:center;padding:48px 20px;
+  color:var(--text-muted);
+}
+.emptyState .emptyIcon{font-size:2.5rem;margin-bottom:12px}
+.emptyState p{font-size:.9rem}
+
+/* ── SELECT ALL ROW ──────────────────────────────────── */
+.selectAllRow{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 14px;background:var(--parchment);border-radius:3px;
+  margin-bottom:10px;font-size:.82rem;color:var(--text-muted);
+}
+
+/* ── CHAR COUNTER ────────────────────────────────────── */
+.charCount{
+  font-size:.72rem;color:var(--text-muted);text-align:right;margin-top:3px;
+}
+.charCount.warn{color:#c86414}
+.charCount.over{color:var(--red)}
+
+/* ── IMPORT HINT ─────────────────────────────────────── */
+.importHint{
+  background:rgba(37,211,102,.08);border:1px dashed rgba(37,211,102,.35);
+  border-radius:4px;padding:14px 18px;margin-bottom:20px;
+  font-size:.83rem;color:#128C7E;display:flex;align-items:center;gap:10px;
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topBar">
+  <div class="topBarLogo">
+    <span class="dot"></span>
+    LexTax CRM &nbsp;·&nbsp; <span style="color:var(--gold-light);font-size:1.1rem">WhatsApp Notifications</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:16px">
+    <div class="waIndicator">WhatsApp Web API Ready</div>
+    <button class="btn btn-outline" style="color:rgba(255,255,255,.65);border-color:rgba(255,255,255,.2);font-size:.78rem" onclick="showImportModal()">⬆ Import CRM Data</button>
+    <button onclick="window.close()" style="
+      padding:6px 14px;border:1.5px solid rgba(255,255,255,.2);
+      background:transparent;color:rgba(255,255,255,.55);
+      border-radius:2px;font-size:.78rem;font-weight:600;letter-spacing:.6px;
+      text-transform:uppercase;cursor:pointer;transition:all .2s;
+      font-family:'Source Sans 3',sans-serif;
+    " onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,.5)'"
+       onmouseout="this.style.color='rgba(255,255,255,.55)';this.style.borderColor='rgba(255,255,255,.2)'">
+      ← Back to CRM
+    </button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebarLabel">Send</div>
+    <div class="navItem active" onclick="showPage('compose',this)">
+      <span class="navIcon">✉️</span> Compose & Send
+    </div>
+    <div class="navItem" onclick="showPage('bulk',this)">
+      <span class="navIcon">📤</span> Bulk Send
+      <span class="navBadge" id="nb-pending">0</span>
+    </div>
+
+    <div class="sidebarLabel">Templates</div>
+    <div class="navItem" onclick="showPage('templates',this)">
+      <span class="navIcon">📋</span> Message Templates
+    </div>
+    <div class="navItem" onclick="showPage('builder',this)">
+      <span class="navIcon">⚙️</span> Template Builder
+    </div>
+
+    <div class="sidebarLabel">Automation</div>
+    <div class="navItem" onclick="showPage('schedules',this)">
+      <span class="navIcon">⏰</span> Auto-Schedules
+    </div>
+    <div class="navItem" onclick="showPage('triggers',this)">
+      <span class="navIcon">⚡</span> Smart Triggers
+    </div>
+
+    <div class="sidebarLabel">History</div>
+    <div class="navItem" onclick="showPage('log',this)">
+      <span class="navIcon">📜</span> Send Log
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── COMPOSE PAGE ── -->
+    <div id="page-compose" class="page active">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Compose &amp; Send</div>
+          <div class="pageSubtitle">Send a WhatsApp message to one or multiple clients</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline btn-sm" onclick="clearCompose()">Clear</button>
+          <button class="btn btn-wa" onclick="sendMessage()">📲 Send via WhatsApp</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="panelHead"><div class="panelTitle">Recipient</div></div>
+            <div class="panelBody">
+              <div class="formGrid">
+                <div class="field">
+                  <label>Send To *</label>
+                  <select id="c-mode" onchange="toggleRecipient()">
+                    <option value="single">Single Client</option>
+                    <option value="phone">Manual Phone Number</option>
+                  </select>
+                </div>
+                <div class="field" id="c-clientWrap">
+                  <label>Select Client *</label>
+                  <select id="c-client" onchange="prefillFromClient()">
+                    <option value="">— Choose client —</option>
+                  </select>
+                </div>
+                <div class="field" id="c-phoneWrap" style="display:none">
+                  <label>Phone Number *</label>
+                  <input id="c-phone" placeholder="+923001234567" type="tel">
+                </div>
+                <div class="field">
+                  <label>Phone (auto-filled)</label>
+                  <input id="c-phoneFill" placeholder="Filled when client selected" readonly style="background:var(--parchment);cursor:default">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelHead">
+              <div class="panelTitle">Message</div>
+              <button class="btn btn-outline btn-sm" onclick="openTemplatePickerFor('compose')">📋 Use Template</button>
+            </div>
+            <div class="panelBody">
+              <div class="field" style="margin-bottom:12px">
+                <label>Message Body *</label>
+                <textarea id="c-message" rows="8" placeholder="Type your message or select a template above…" oninput="updatePreview();countChars()"></textarea>
+                <div class="charCount" id="c-charCount">0 / 1000</div>
+              </div>
+              <div style="margin-bottom:8px">
+                <span style="font-size:.75rem;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text-muted)">Insert Variable:</span>
+              </div>
+              <div class="varChips" id="varChipCompose">
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{client_name}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{phone}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{case_title}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{case_type}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{deadline}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{invoice_num}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{invoice_amount}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{invoice_status}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{fbr_type}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{tax_year}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{today_date}}</span>
+                <span class="varChip" onclick="insertVar(this,'c-message')">{{firm_name}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE PREVIEW -->
+        <div>
+          <div class="panel" style="position:sticky;top:80px">
+            <div class="panelHead"><div class="panelTitle">Live Preview</div></div>
+            <div style="background:#e5ddd5;background-image:url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c0b8ae' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);padding:16px 14px;min-height:240px">
+              <div class="waHeader">
+                <div class="waAvatar">LT</div>
+                <div>
+                  <div style="font-weight:700">LexTax Associates</div>
+                  <div style="font-size:.72rem;opacity:.75">online</div>
+                </div>
+              </div>
+              <div style="padding:14px 10px">
+                <div class="waBubble" id="previewBubble">
+                  <em style="color:#aaa;font-size:.82rem">Your message will appear here…</em>
+                </div>
+                <div class="waBubbleTime" id="previewTime"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BULK SEND PAGE ── -->
+    <div id="page-bulk" class="page">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Bulk Send</div>
+          <div class="pageSubtitle">Send a templated message to multiple clients at once</div>
+        </div>
+        <button class="btn btn-wa" onclick="sendBulk()">📲 Send to Selected</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="panelHead">
+              <div class="panelTitle">Select Recipients</div>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline btn-sm" onclick="filterClients('all')">All</button>
+                <button class="btn btn-outline btn-sm" onclick="filterClients('overdue')">Overdue</button>
+                <button class="btn btn-outline btn-sm" onclick="filterClients('deadline')">Deadline Soon</button>
+              </div>
+            </div>
+            <div class="panelBody">
+              <div class="searchBar"><input id="srchBulk" placeholder="Search clients…" oninput="renderBulkList()"></div>
+              <div class="selectAllRow">
+                <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
+                  Select all visible
+                </label>
+                <span id="bulkCount" style="font-weight:600;color:var(--navy)">0 selected</span>
+              </div>
+              <div id="bulkRecipients"></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <div class="panelHead">
+              <div class="panelTitle">Message Template</div>
+              <button class="btn btn-outline btn-sm" onclick="openTemplatePickerFor('bulk')">📋 Choose Template</button>
+            </div>
+            <div class="panelBody">
+              <div class="field" style="margin-bottom:10px">
+                <label>Message (variables auto-filled per client)</label>
+                <textarea id="b-message" rows="7" placeholder="Select a template or type your message…" oninput="countBulkChars()"></textarea>
+                <div class="charCount" id="b-charCount">0 / 1000</div>
+              </div>
+              <div class="varChips">
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{client_name}}</span>
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{phone}}</span>
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{case_title}}</span>
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{deadline}}</span>
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{invoice_amount}}</span>
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{today_date}}</span>
+                <span class="varChip" onclick="insertVar(this,'b-message')">{{firm_name}}</span>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panelHead"><div class="panelTitle">Delay Between Messages</div></div>
+            <div class="panelBody" style="display:flex;gap:16px;align-items:center">
+              <div class="field" style="flex:1">
+                <label>Delay (seconds)</label>
+                <input id="b-delay" type="number" value="3" min="1" max="60">
+              </div>
+              <div style="font-size:.82rem;color:var(--text-muted);margin-top:20px">
+                Prevents spam detection. Recommended: 3–10s
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TEMPLATES PAGE ── -->
+    <div id="page-templates" class="page">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Message Templates</div>
+          <div class="pageSubtitle">Reusable messages with smart variable placeholders</div>
+        </div>
+        <button class="btn btn-navy" onclick="showPage('builder',document.querySelector('.navItem:nth-child(4))'))">+ New Template</button>
+      </div>
+
+      <div class="importHint">
+        💡 Variables like <code>{{client_name}}</code> are automatically replaced with real client data when sending
+      </div>
+
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm filterBtn active" onclick="filterTemplates('all',this)">All</button>
+        <button class="btn btn-outline btn-sm filterBtn" onclick="filterTemplates('invoice',this)">Invoice</button>
+        <button class="btn btn-outline btn-sm filterBtn" onclick="filterTemplates('deadline',this)">Deadlines</button>
+        <button class="btn btn-outline btn-sm filterBtn" onclick="filterTemplates('case',this)">Cases</button>
+        <button class="btn btn-outline btn-sm filterBtn" onclick="filterTemplates('fbr',this)">FBR</button>
+        <button class="btn btn-outline btn-sm filterBtn" onclick="filterTemplates('reminder',this)">Reminders</button>
+        <button class="btn btn-outline btn-sm filterBtn" onclick="filterTemplates('general',this)">General</button>
+      </div>
+
+      <div id="templatesList"></div>
+    </div>
+
+    <!-- ── TEMPLATE BUILDER PAGE ── -->
+    <div id="page-builder" class="page">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Template Builder</div>
+          <div class="pageSubtitle">Create and edit reusable WhatsApp message templates</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start">
+        <div>
+          <div class="panel">
+            <div class="panelHead"><div class="panelTitle">Template Details</div></div>
+            <div class="panelBody">
+              <div class="formGrid" style="margin-bottom:16px">
+                <div class="field">
+                  <label>Template Name *</label>
+                  <input id="t-name" placeholder="e.g. Invoice Payment Reminder">
+                </div>
+                <div class="field">
+                  <label>Category *</label>
+                  <select id="t-category">
+                    <option value="invoice">Invoice / Billing</option>
+                    <option value="deadline">Deadline / Urgency</option>
+                    <option value="case">Case Update</option>
+                    <option value="fbr">FBR / Tax Compliance</option>
+                    <option value="reminder">General Reminder</option>
+                    <option value="general">General / Welcome</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Language</label>
+                  <select id="t-lang">
+                    <option value="en">English</option>
+                    <option value="ur">Urdu (Roman)</option>
+                    <option value="mixed">Mixed</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Template ID (auto)</label>
+                  <input id="t-id" readonly style="background:var(--parchment);cursor:default;font-family:'Courier Prime',monospace;font-size:.82rem">
+                </div>
+              </div>
+              <div class="field" style="margin-bottom:10px">
+                <label>Message Body *</label>
+                <textarea id="t-body" rows="10" placeholder="Write your template message here. Use {{variables}} for dynamic content…" oninput="updateBuilderPreview();countBuilderChars()"></textarea>
+                <div class="charCount" id="t-charCount">0 / 1000</div>
+              </div>
+              <div style="margin-bottom:8px">
+                <span style="font-size:.75rem;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text-muted)">Available Variables:</span>
+              </div>
+              <div class="varChips">
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{client_name}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{phone}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{case_title}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{case_type}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{deadline}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{invoice_num}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{invoice_amount}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{invoice_status}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{fbr_type}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{tax_year}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{fbr_due}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{notice_num}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{ntn}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{today_date}}</span>
+                <span class="varChip" onclick="insertVar(this,'t-body');updateBuilderPreview()">{{firm_name}}</span>
+              </div>
+              <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+                <button class="btn btn-outline" onclick="resetBuilder()">Clear</button>
+                <button class="btn btn-navy" onclick="saveTemplate()">💾 Save Template</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Builder Preview -->
+        <div style="position:sticky;top:80px">
+          <div class="panel">
+            <div class="panelHead"><div class="panelTitle">Preview (sample data)</div></div>
+            <div style="background:#e5ddd5;background-image:url(&quot;data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c0b8ae' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E&quot;);padding:16px 14px;min-height:260px">
+              <div class="waHeader">
+                <div class="waAvatar">LT</div>
+                <div><div style="font-weight:700">LexTax Associates</div><div style="font-size:.72rem;opacity:.75">online</div></div>
+              </div>
+              <div style="padding:14px 10px">
+                <div class="waBubble" id="builderPreview">
+                  <em style="color:#aaa;font-size:.82rem">Template preview will appear here…</em>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULES PAGE ── -->
+    <div id="page-schedules" class="page">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Auto-Schedules</div>
+          <div class="pageSubtitle">Automatic recurring WhatsApp notifications</div>
+        </div>
+      </div>
+      <div class="statsGrid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="statCard wa-card" data-icon="⏰">
+          <div class="statValue" id="sch-active">0</div>
+          <div class="statLabel">Active Schedules</div>
+        </div>
+        <div class="statCard gold" data-icon="📅">
+          <div class="statValue" id="sch-today">0</div>
+          <div class="statLabel">Triggers Today</div>
+        </div>
+        <div class="statCard navy" data-icon="📊">
+          <div class="statValue" id="sch-total">0</div>
+          <div class="statLabel">Total Scheduled</div>
+        </div>
+      </div>
+      <div id="schedulesList"></div>
+    </div>
+
+    <!-- ── TRIGGERS PAGE ── -->
+    <div id="page-triggers" class="page">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Smart Triggers</div>
+          <div class="pageSubtitle">Event-based automatic notifications</div>
+        </div>
+        <button class="btn btn-navy" onclick="openModal('addTriggerModal')">+ Add Trigger</button>
+      </div>
+      <div id="triggersList"></div>
+    </div>
+
+    <!-- ── LOG PAGE ── -->
+    <div id="page-log" class="page">
+      <div class="pageHeader">
+        <div>
+          <div class="pageTitle">Send Log</div>
+          <div class="pageSubtitle">History of all dispatched WhatsApp notifications</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-outline btn-sm" onclick="clearLog()">🗑 Clear Log</button>
+          <button class="btn btn-outline btn-sm" onclick="exportLog()">⬇ Export CSV</button>
+        </div>
+      </div>
+      <div class="statsGrid" style="grid-template-columns:repeat(4,1fr);margin-bottom:24px">
+        <div class="statCard wa-card" data-icon="📲"><div class="statValue" id="log-sent">0</div><div class="statLabel">Total Sent</div></div>
+        <div class="statCard green" data-icon="✅"><div class="statValue" id="log-delivered">0</div><div class="statLabel">Delivered</div></div>
+        <div class="statCard gold" data-icon="⏳"><div class="statValue" id="log-pending">0</div><div class="statLabel">Pending</div></div>
+        <div class="statCard red" data-icon="❌"><div class="statValue" id="log-failed">0</div><div class="statLabel">Failed</div></div>
+      </div>
+      <div class="panel">
+        <div class="panelHead"><div class="panelTitle">Message History</div></div>
+        <div class="panelBody" style="padding:0">
+          <div class="tableWrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Recipient</th><th>Phone</th><th>Template / Message</th>
+                  <th>Sent At</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="logTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── TEMPLATE PICKER MODAL ── -->
+<div class="modal" id="templatePickerModal">
+  <div class="modalBox" style="width:600px">
+    <div class="modalHead">
+      Choose a Template
+      <button class="modalClose" onclick="closeModal('templatePickerModal')">✕</button>
+    </div>
+    <div class="modalBody">
+      <div class="searchBar" style="margin-bottom:14px">
+        <input id="tpSearch" placeholder="Search templates…" oninput="renderTemplatePicker()">
+      </div>
+      <div id="templatePickerList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD TRIGGER MODAL ── -->
+<div class="modal" id="addTriggerModal">
+  <div class="modalBox">
+    <div class="modalHead">
+      Add Smart Trigger
+      <button class="modalClose" onclick="closeModal('addTriggerModal')">✕</button>
+    </div>
+    <div class="modalBody">
+      <div class="formGrid">
+        <div class="field">
+          <label>Trigger Name *</label>
+          <input id="tr-name" placeholder="e.g. Invoice Due Reminder">
+        </div>
+        <div class="field">
+          <label>Event *</label>
+          <select id="tr-event">
+            <option value="deadline_3">Case Deadline in 3 days</option>
+            <option value="deadline_7">Case Deadline in 7 days</option>
+            <option value="invoice_overdue">Invoice Overdue</option>
+            <option value="invoice_due_3">Invoice Due in 3 days</option>
+            <option value="fbr_due_7">FBR Filing Due in 7 days</option>
+            <option value="fbr_notice_open">FBR Notice Still Open</option>
+            <option value="new_client">New Client Added</option>
+            <option value="case_status">Case Status Changed</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Message Template *</label>
+          <select id="tr-template">
+            <option value="">— Select template —</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Active</label>
+          <select id="tr-active">
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modalFoot">
+      <button class="btn btn-outline" onclick="closeModal('addTriggerModal')">Cancel</button>
+      <button class="btn btn-navy" onclick="saveTrigger()">Save Trigger</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── IMPORT MODAL ── -->
+<div class="modal" id="importModal">
+  <div class="modalBox" style="width:500px">
+    <div class="modalHead">
+      Import LexTax CRM Data
+      <button class="modalClose" onclick="closeModal('importModal')">✕</button>
+    </div>
+    <div class="modalBody">
+      <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:18px">
+        Import your LexTax CRM backup JSON to sync clients, cases, invoices, and FBR data.
+      </p>
+      <div class="field" style="margin-bottom:14px">
+        <label>CRM Backup File (.json)</label>
+        <input type="file" id="importFile" accept=".json" onchange="importCRMData(event)" style="background:var(--white)">
+      </div>
+      <p style="font-size:.78rem;color:var(--text-muted)">
+        Go to LexTax CRM → Backup → Export to get your data file.
+      </p>
+    </div>
+    <div class="modalFoot">
+      <button class="btn btn-outline" onclick="closeModal('importModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MESSAGE PREVIEW MODAL ── -->
+<div class="modal" id="previewModal">
+  <div class="modalBox" style="width:480px">
+    <div class="modalHead">
+      Message Preview
+      <button class="modalClose" onclick="closeModal('previewModal')">✕</button>
+    </div>
+    <div class="modalBody" id="previewModalBody"></div>
+    <div class="modalFoot">
+      <button class="btn btn-outline" onclick="closeModal('previewModal')">Close</button>
+      <button class="btn btn-wa" id="previewSendBtn">📲 Send Now</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────
+// DATA STORE
+// ─────────────────────────────────────────────────────
+let db = {
+  clients: JSON.parse(localStorage.getItem('ltx-wa-clients') || localStorage.getItem('ltx-clients') || '[]'),
+  cases:   JSON.parse(localStorage.getItem('ltx-wa-cases')   || localStorage.getItem('ltx-cases')   || '[]'),
+  invoices:JSON.parse(localStorage.getItem('ltx-wa-invoices')|| localStorage.getItem('ltx-invoices')|| '[]'),
+  fbrFilings: JSON.parse(localStorage.getItem('ltx-wa-fbr')  || localStorage.getItem('ltx-fbr')    || '[]'),
+  fbrNotices: JSON.parse(localStorage.getItem('ltx-wa-notices')||localStorage.getItem('ltx-notices')|| '[]'),
+};
+
+let templates = JSON.parse(localStorage.getItem('ltx-wa-templates') || '[]');
+let sendLog   = JSON.parse(localStorage.getItem('ltx-wa-log')        || '[]');
+let triggers  = JSON.parse(localStorage.getItem('ltx-wa-triggers')   || '[]');
+let schedules = JSON.parse(localStorage.getItem('ltx-wa-schedules')  || '[]');
+let selectedBulk = new Set();
+let templatePickerTarget = 'compose'; // 'compose' or 'bulk'
+let editingTemplate = null;
+
+// ─────────────────────────────────────────────────────
+// DEFAULT TEMPLATES
+// ─────────────────────────────────────────────────────
+const DEFAULT_TEMPLATES = [
+  {
+    id: 'tpl_001', name: 'Invoice Payment Reminder', category: 'invoice', lang: 'en',
+    body: `Dear {{client_name}},
+
+We hope this message finds you well. This is a courteous reminder that your invoice *{{invoice_num}}* for *PKR {{invoice_amount}}* is currently *{{invoice_status}}*.
+
+Please arrange payment at your earliest convenience.
+
+For any queries, please do not hesitate to contact us.
+
+Warm regards,
+*{{firm_name}}*
+⚖️ Tax Law & Advisory`
+  },
+  {
+    id: 'tpl_002', name: 'Case Deadline Approaching', category: 'deadline', lang: 'en',
+    body: `Dear {{client_name}},
+
+⚠️ *DEADLINE ALERT*
+
+Your case *"{{case_title}}"* ({{case_type}}) has an important deadline approaching on *{{deadline}}*.
+
+Please ensure all required documents and information are submitted to our office by the due date to avoid any legal complications.
+
+Contact us immediately if you need assistance.
+
+*{{firm_name}}*`
+  },
+  {
+    id: 'tpl_003', name: 'FBR Filing Due', category: 'fbr', lang: 'en',
+    body: `Dear {{client_name}},
+
+📋 *FBR COMPLIANCE NOTICE*
+
+Your *{{fbr_type}}* for tax year *{{tax_year}}* is due on *{{fbr_due}}*.
+
+Please provide the following:
+• Financial statements
+• Income details
+• Supporting documents
+
+Timely filing avoids penalties under the Income Tax Ordinance 2001.
+
+*{{firm_name}}*`
+  },
+  {
+    id: 'tpl_004', name: 'Welcome New Client', category: 'general', lang: 'en',
+    body: `Dear {{client_name}},
+
+Welcome to *{{firm_name}}*! 🎉
+
+We are delighted to have you as our valued client. Our team of expert tax lawyers is committed to providing you with the highest standard of legal and tax advisory services.
+
+Your client file has been created and our team will reach out shortly to discuss your case.
+
+Best regards,
+*{{firm_name}}*
+⚖️ Tax Law & Advisory`
+  },
+  {
+    id: 'tpl_005', name: 'FBR Notice Received', category: 'fbr', lang: 'en',
+    body: `Dear {{client_name}},
+
+🚨 *URGENT: FBR NOTICE*
+
+We have received *Notice No. {{notice_num}}* on your behalf. This requires immediate attention.
+
+Please *contact our office within 48 hours* to discuss the required response and legal strategy.
+
+Delay may result in adverse orders.
+
+*{{firm_name}}*
+📞 Please call us immediately.`
+  },
+  {
+    id: 'tpl_006', name: 'Invoice Paid — Thank You', category: 'invoice', lang: 'en',
+    body: `Dear {{client_name}},
+
+✅ *Payment Received*
+
+Thank you! We have received your payment for invoice *{{invoice_num}}*. A formal receipt has been generated for your records.
+
+We appreciate your promptness and look forward to continuing to serve you.
+
+*{{firm_name}}*`
+  },
+  {
+    id: 'tpl_007', name: 'Meeting Reminder', category: 'reminder', lang: 'en',
+    body: `Dear {{client_name}},
+
+🗓️ *Appointment Reminder*
+
+This is a reminder for your scheduled meeting at *{{firm_name}}*.
+
+Kindly bring all relevant documents pertaining to your case *"{{case_title}}"*.
+
+If you need to reschedule, please contact us at least 24 hours in advance.
+
+*{{firm_name}}*`
+  },
+  {
+    id: 'tpl_008', name: 'NTN Registration Success', category: 'fbr', lang: 'en',
+    body: `Dear {{client_name}},
+
+🆔 *NTN Registration Confirmed*
+
+Your National Tax Number (NTN) registration has been successfully processed.
+
+*NTN: {{ntn}}*
+
+Please keep this number safe for all future tax filings and correspondence with FBR.
+
+*{{firm_name}}*`
+  },
+  {
+    id: 'tpl_009', name: 'Case Status Update', category: 'case', lang: 'en',
+    body: `Dear {{client_name}},
+
+📁 *Case Update: {{case_title}}*
+
+We have an important update regarding your {{case_type}} case. Please contact our office at your earliest convenience to discuss the latest developments.
+
+Your case reference remains active in our system. We are working diligently on your matter.
+
+*{{firm_name}}*`
+  },
+  {
+    id: 'tpl_010', name: 'Overdue Invoice — Urgent', category: 'invoice', lang: 'en',
+    body: `Dear {{client_name}},
+
+⚠️ *OVERDUE INVOICE NOTICE*
+
+Invoice *{{invoice_num}}* for *PKR {{invoice_amount}}* is now *overdue*.
+
+As per our engagement terms, outstanding amounts accrue interest after the due date. Please settle this balance immediately to avoid further action.
+
+If there is any issue, please contact us right away.
+
+*{{firm_name}}*`
+  },
+];
+
+function initTemplates() {
+  if (!templates.length) {
+    templates = JSON.parse(JSON.stringify(DEFAULT_TEMPLATES));
+    saveTemplates();
+  }
+}
+
+function initSchedules() {
+  if (!schedules.length) {
+    schedules = [
+      { id: 'sch_001', name: 'Daily Deadline Check', icon: '📅', description: 'Check for cases with deadline in next 3 days, send reminder', frequency: 'Daily at 9:00 AM', active: true, triggeredToday: 2 },
+      { id: 'sch_002', name: 'Weekly Invoice Sweep', icon: '🧾', description: 'Send reminder to clients with unpaid/overdue invoices', frequency: 'Every Monday at 10:00 AM', active: true, triggeredToday: 0 },
+      { id: 'sch_003', name: 'FBR Deadline Monitor', icon: '🏛', description: 'Alert clients when FBR filing is due within 7 days', frequency: 'Daily at 8:00 AM', active: false, triggeredToday: 0 },
+      { id: 'sch_004', name: 'Monthly Statement', icon: '📊', description: 'Send monthly billing summary to all active clients', frequency: '1st of each month at 9:00 AM', active: false, triggeredToday: 0 },
+    ];
+    localStorage.setItem('ltx-wa-schedules', JSON.stringify(schedules));
+  }
+}
+
+// ─────────────────────────────────────────────────────
+// UTILITIES
+// ─────────────────────────────────────────────────────
+function save() {
+  localStorage.setItem('ltx-wa-templates', JSON.stringify(templates));
+  localStorage.setItem('ltx-wa-log',       JSON.stringify(sendLog));
+  localStorage.setItem('ltx-wa-triggers',  JSON.stringify(triggers));
+}
+function saveTemplates() { localStorage.setItem('ltx-wa-templates', JSON.stringify(templates)); }
+
+function toast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+function esc(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function fmtAmt(n) {
+  if (!n) return '0';
+  return 'PKR ' + Number(n).toLocaleString('en-PK');
+}
+
+function nowTime() {
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+}
+
+function nowISO() {
+  return new Date().toISOString();
+}
+
+function generateId(prefix) {
+  return prefix + '_' + Date.now().toString(36).toUpperCase();
+}
+
+// ─────────────────────────────────────────────────────
+// VARIABLE ENGINE — resolve {{variables}} with real data
+// ─────────────────────────────────────────────────────
+function resolveVars(text, client, context = {}) {
+  const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Find most recent case/invoice for this client
+  const clientCases    = db.cases.filter(c => c.client === (client ? client.name : ''));
+  const clientInvoices = db.invoices.filter(i => i.client === (client ? client.name : ''));
+  const clientFbr      = db.fbrFilings.filter(f => f.client === (client ? client.name : ''));
+  const clientNotices  = db.fbrNotices.filter(n => n.client === (client ? client.name : ''));
+
+  const latestCase    = clientCases[clientCases.length - 1] || {};
+  const latestInv     = clientInvoices[clientInvoices.length - 1] || {};
+  const latestFbr     = clientFbr[clientFbr.length - 1] || {};
+  const latestNotice  = clientNotices[clientNotices.length - 1] || {};
+
+  const vars = {
+    '{{client_name}}':     client ? client.name : context.client_name || '[Client Name]',
+    '{{phone}}':           client ? client.phone : context.phone || '[Phone]',
+    '{{case_title}}':      latestCase.title || context.case_title || '[Case Title]',
+    '{{case_type}}':       latestCase.type  || context.case_type  || '[Case Type]',
+    '{{deadline}}':        latestCase.deadline ? fmtDate(latestCase.deadline) : context.deadline || '[Deadline]',
+    '{{invoice_num}}':     latestInv.num    || context.invoice_num    || '[Invoice #]',
+    '{{invoice_amount}}':  latestInv.amount ? Number(latestInv.amount).toLocaleString('en-PK') : context.invoice_amount || '[Amount]',
+    '{{invoice_status}}':  latestInv.status || context.invoice_status || '[Status]',
+    '{{fbr_type}}':        latestFbr.type   || context.fbr_type   || '[Filing Type]',
+    '{{tax_year}}':        latestFbr.year   || context.tax_year   || '[Tax Year]',
+    '{{fbr_due}}':         latestFbr.due ? fmtDate(latestFbr.due) : context.fbr_due || '[Due Date]',
+    '{{notice_num}}':      latestNotice.num || context.notice_num || '[Notice #]',
+    '{{ntn}}':             context.ntn || '[NTN]',
+    '{{today_date}}':      today,
+    '{{firm_name}}':       'LexTax Associates',
+  };
+
+  let result = text;
+  for (const [key, val] of Object.entries(vars)) {
+    result = result.replaceAll(key, val);
+  }
+  return result;
+}
+
+// Sample data for preview
+const SAMPLE_DATA = {
+  client: { name: 'Ahmad Malik', phone: '+923001234567' },
+  context: {
+    case_title: 'Income Tax Dispute 2024',
+    case_type: 'Tax Litigation',
+    deadline: '15 Jul 2025',
+    invoice_num: 'INV-1042',
+    invoice_amount: '75,000',
+    invoice_status: 'Pending',
+    fbr_type: 'Income Tax Return',
+    tax_year: '2024-25',
+    fbr_due: '30 Sep 2025',
+    notice_num: 'IT/Notice/2025/087',
+    ntn: '1234567-8',
+  }
+};
+
+// ─────────────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────────────
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.navItem').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else {
+    const items = document.querySelectorAll('.navItem');
+    items.forEach(item => {
+      if (item.getAttribute('onclick') && item.getAttribute('onclick').includes("'" + id + "'")) {
+        item.classList.add('active');
+      }
+    });
+  }
+  renderPage(id);
+}
+
+function renderPage(id) {
+  if (id === 'templates')  renderTemplates();
+  if (id === 'log')        renderLog();
+  if (id === 'bulk')       renderBulkList();
+  if (id === 'schedules')  renderSchedules();
+  if (id === 'triggers')   renderTriggers();
+  if (id === 'compose')    populateClientSelect();
+  if (id === 'builder')    { resetBuilder(); }
+}
+
+// ─────────────────────────────────────────────────────
+// MODALS
+// ─────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+window.addEventListener('click', e => {
+  document.querySelectorAll('.modal.open').forEach(m => {
+    if (e.target === m) m.classList.remove('open');
+  });
+});
+
+function showImportModal() { openModal('importModal'); }
+
+// ─────────────────────────────────────────────────────
+// COMPOSE PAGE
+// ─────────────────────────────────────────────────────
+function populateClientSelect() {
+  const sel = document.getElementById('c-client');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Choose client —</option>';
+  db.clients.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id || c.name;
+    opt.textContent = c.name + (c.phone ? ' (' + c.phone + ')' : '');
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+
+function prefillFromClient() {
+  const sel  = document.getElementById('c-client');
+  const fill = document.getElementById('c-phoneFill');
+  const opt  = sel.options[sel.selectedIndex];
+  const name = opt ? opt.textContent.split(' (')[0] : '';
+  const client = db.clients.find(c => c.name === name);
+  fill.value = client ? (client.phone || '') : '';
+  updatePreview();
+}
+
+function toggleRecipient() {
+  const mode = document.getElementById('c-mode').value;
+  document.getElementById('c-clientWrap').style.display = mode === 'single' ? '' : 'none';
+  document.getElementById('c-phoneWrap').style.display  = mode === 'phone'  ? '' : 'none';
+}
+
+function insertVar(chip, targetId) {
+  const ta = document.getElementById(targetId);
+  if (!ta) return;
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  const text  = ta.value;
+  ta.value = text.slice(0, start) + chip.textContent.trim() + text.slice(end);
+  ta.setSelectionRange(start + chip.textContent.trim().length, start + chip.textContent.trim().length);
+  ta.focus();
+  updatePreview();
+  updateBuilderPreview();
+}
+
+function updatePreview() {
+  const msg  = document.getElementById('c-message').value;
+  const prev = document.getElementById('previewBubble');
+  const time = document.getElementById('previewTime');
+  if (!msg.trim()) {
+    prev.innerHTML = '<em style="color:#aaa;font-size:.82rem">Your message will appear here…</em>';
+    time.textContent = '';
+    return;
+  }
+
+  const sel = document.getElementById('c-client');
+  const opt = sel ? sel.options[sel.selectedIndex] : null;
+  const name = opt ? opt.textContent.split(' (')[0] : '';
+  const client = db.clients.find(c => c.name === name) || null;
+
+  const resolved = resolveVars(msg, client, SAMPLE_DATA.context);
+  prev.textContent = resolved;
+  time.textContent = nowTime() + ' ✓✓';
+}
+
+function updateBuilderPreview() {
+  const msg  = document.getElementById('t-body').value;
+  const prev = document.getElementById('builderPreview');
+  if (!msg.trim()) {
+    prev.innerHTML = '<em style="color:#aaa;font-size:.82rem">Template preview will appear here…</em>';
+    return;
+  }
+  const resolved = resolveVars(msg, SAMPLE_DATA.client, SAMPLE_DATA.context);
+  prev.textContent = resolved;
+}
+
+function countChars() {
+  const len = (document.getElementById('c-message').value || '').length;
+  const el  = document.getElementById('c-charCount');
+  el.textContent = len + ' / 1000';
+  el.className   = 'charCount' + (len > 900 ? ' warn' : '') + (len > 1000 ? ' over' : '');
+}
+function countBulkChars() {
+  const len = (document.getElementById('b-message').value || '').length;
+  const el  = document.getElementById('b-charCount');
+  el.textContent = len + ' / 1000';
+  el.className   = 'charCount' + (len > 900 ? ' warn' : '') + (len > 1000 ? ' over' : '');
+}
+function countBuilderChars() {
+  const len = (document.getElementById('t-body').value || '').length;
+  const el  = document.getElementById('t-charCount');
+  el.textContent = len + ' / 1000';
+  el.className   = 'charCount' + (len > 900 ? ' warn' : '') + (len > 1000 ? ' over' : '');
+}
+
+function clearCompose() {
+  document.getElementById('c-message').value = '';
+  document.getElementById('c-client').selectedIndex = 0;
+  document.getElementById('c-phone').value = '';
+  document.getElementById('c-phoneFill').value = '';
+  updatePreview(); countChars();
+}
+
+function sendMessage() {
+  const mode    = document.getElementById('c-mode').value;
+  const msg     = document.getElementById('c-message').value.trim();
+  if (!msg) { toast('Please write a message.'); return; }
+
+  let phone, clientName, client;
+
+  if (mode === 'single') {
+    const sel = document.getElementById('c-client');
+    const opt = sel.options[sel.selectedIndex];
+    const name = opt ? opt.textContent.split(' (')[0] : '';
+    client = db.clients.find(c => c.name === name);
+    if (!client) { toast('Please select a client.'); return; }
+    phone      = client.phone;
+    clientName = client.name;
+  } else {
+    phone = document.getElementById('c-phone').value.trim();
+    clientName = 'Manual';
+    if (!phone) { toast('Please enter a phone number.'); return; }
+  }
+
+  if (!phone) { toast('Client has no phone number on file.'); return; }
+
+  const resolved = resolveVars(msg, client || null, SAMPLE_DATA.context);
+  const waNum    = phone.replace(/\D/g, '');
+  const waMsg    = encodeURIComponent(resolved);
+  const waUrl    = 'https://wa.me/' + waNum + '?text=' + waMsg;
+
+  // Log it
+  sendLog.unshift({
+    id: generateId('LOG'),
+    recipient: clientName,
+    phone: phone,
+    message: resolved.slice(0, 80) + (resolved.length > 80 ? '…' : ''),
+    sentAt: nowISO(),
+    status: 'Sent',
+  });
+  save();
+  updateLogStats();
+
+  window.open(waUrl, '_blank');
+  toast('Opening WhatsApp…', 'wa');
+}
+
+// ─────────────────────────────────────────────────────
+// BULK SEND
+// ─────────────────────────────────────────────────────
+function renderBulkList() {
+  const q    = (document.getElementById('srchBulk').value || '').toLowerCase();
+  const wrap = document.getElementById('bulkRecipients');
+  const filtered = db.clients.filter(c =>
+    c.name.toLowerCase().includes(q) || (c.phone || '').includes(q)
+  );
+
+  if (!filtered.length) {
+    wrap.innerHTML = '<div class="emptyState"><div class="emptyIcon">👥</div><p>No clients found. Import your CRM data first.</p></div>';
+    updateBulkCount();
+    return;
+  }
+
+  wrap.innerHTML = filtered.map(c => {
+    const checked = selectedBulk.has(c.id || c.name);
+    const initials = c.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `<div class="recipientItem">
+      <div class="recipientAvatar">${initials}</div>
+      <div class="recipientInfo">
+        <div class="recipientName">${esc(c.name)}</div>
+        <div class="recipientPhone">${esc(c.phone || 'No phone')}</div>
+      </div>
+      <div class="recipientCheck ${checked ? 'checked' : ''}" id="chk-${c.id || c.name}"
+        onclick="toggleRecipient2('${(c.id || c.name).toString().replace(/'/g,"\\'")}',this)">
+        ${checked ? '✓' : ''}
+      </div>
+    </div>`;
+  }).join('');
+  updateBulkCount();
+}
+
+function toggleRecipient2(id, el) {
+  if (selectedBulk.has(id)) {
+    selectedBulk.delete(id);
+    el.classList.remove('checked');
+    el.textContent = '';
+  } else {
+    selectedBulk.add(id);
+    el.classList.add('checked');
+    el.textContent = '✓';
+  }
+  updateBulkCount();
+}
+
+function toggleSelectAll() {
+  const checked = document.getElementById('selectAll').checked;
+  const q = (document.getElementById('srchBulk').value || '').toLowerCase();
+  const filtered = db.clients.filter(c =>
+    c.name.toLowerCase().includes(q) || (c.phone || '').includes(q)
+  );
+  if (checked) {
+    filtered.forEach(c => selectedBulk.add(c.id || c.name));
+  } else {
+    filtered.forEach(c => selectedBulk.delete(c.id || c.name));
+  }
+  renderBulkList();
+}
+
+function updateBulkCount() {
+  document.getElementById('bulkCount').textContent = selectedBulk.size + ' selected';
+  document.getElementById('nb-pending').textContent = selectedBulk.size;
+}
+
+function filterClients(type) {
+  if (type === 'all') {
+    document.getElementById('srchBulk').value = '';
+    renderBulkList();
+    return;
+  }
+  const today = new Date();
+  let filtered = [];
+  if (type === 'overdue') {
+    filtered = db.clients.filter(c =>
+      db.invoices.some(i => i.client === c.name && i.status === 'Overdue')
+    );
+  } else if (type === 'deadline') {
+    const soon = new Date(today); soon.setDate(soon.getDate() + 7);
+    filtered = db.clients.filter(c =>
+      db.cases.some(cs => cs.client === c.name && cs.deadline && new Date(cs.deadline) <= soon && new Date(cs.deadline) >= today)
+    );
+  }
+  selectedBulk.clear();
+  filtered.forEach(c => selectedBulk.add(c.id || c.name));
+  renderBulkList();
+  toast(`${filtered.length} clients selected`);
+}
+
+async function sendBulk() {
+  const msg = document.getElementById('b-message').value.trim();
+  if (!msg) { toast('Please write or select a template.'); return; }
+  if (!selectedBulk.size) { toast('Please select at least one recipient.'); return; }
+  const delay = parseInt(document.getElementById('b-delay').value) || 3;
+
+  const recipients = db.clients.filter(c => selectedBulk.has(c.id || c.name));
+  let sent = 0;
+
+  for (const client of recipients) {
+    if (!client.phone) continue;
+    const resolved = resolveVars(msg, client);
+    const waNum = client.phone.replace(/\D/g, '');
+    const waUrl = 'https://wa.me/' + waNum + '?text=' + encodeURIComponent(resolved);
+
+    sendLog.unshift({
+      id: generateId('LOG'),
+      recipient: client.name,
+      phone: client.phone,
+      message: resolved.slice(0, 80) + (resolved.length > 80 ? '…' : ''),
+      sentAt: nowISO(),
+      status: 'Sent',
+    });
+    sent++;
+
+    window.open(waUrl, '_blank');
+    await new Promise(r => setTimeout(r, delay * 1000));
+  }
+
+  save();
+  updateLogStats();
+  toast(`Sent to ${sent} recipient${sent !== 1 ? 's' : ''} 🎉`, 'wa');
+}
+
+// ─────────────────────────────────────────────────────
+// TEMPLATES
+// ─────────────────────────────────────────────────────
+let currentFilter = 'all';
+
+function renderTemplates() {
+  const container = document.getElementById('templatesList');
+  const filtered  = currentFilter === 'all'
+    ? templates
+    : templates.filter(t => t.category === currentFilter);
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="emptyState"><div class="emptyIcon">📋</div><p>No templates in this category.</p></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(t => `
+    <div class="templateBox">
+      <div class="templateMeta">
+        <div class="templateName">${esc(t.name)}</div>
+        <span class="templateCategory cat-${t.category}">${catLabel(t.category)}</span>
+        <span class="badge badge-navy" style="font-size:.65rem">${t.lang.toUpperCase()}</span>
+      </div>
+      <div class="templatePreview">${esc(t.body.slice(0, 240) + (t.body.length > 240 ? '…' : ''))}</div>
+      <div class="templateActions">
+        <button class="btn btn-sm btn-wa" onclick="useTemplate('${t.id}','compose')">✉️ Compose</button>
+        <button class="btn btn-sm btn-outline" onclick="useTemplate('${t.id}','bulk')">📤 Bulk</button>
+        <button class="btn btn-sm btn-outline" onclick="editTemplate('${t.id}')">✏️ Edit</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteTemplate('${t.id}')">Del</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterTemplates(cat, btn) {
+  currentFilter = cat;
+  document.querySelectorAll('.filterBtn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTemplates();
+}
+
+function catLabel(cat) {
+  const map = { invoice:'Invoice', deadline:'Deadline', case:'Case', fbr:'FBR', reminder:'Reminder', general:'General' };
+  return map[cat] || cat;
+}
+
+function useTemplate(id, target) {
+  const tpl = templates.find(t => t.id === id);
+  if (!tpl) return;
+  if (target === 'compose' || target === 'bulk') {
+    const field = target === 'compose' ? 'c-message' : 'b-message';
+    document.getElementById(field).value = tpl.body;
+    if (target === 'compose') { updatePreview(); countChars(); }
+    else countBulkChars();
+    showPage(target, null);
+    toast('Template applied: ' + tpl.name);
+  }
+}
+
+function editTemplate(id) {
+  const tpl = templates.find(t => t.id === id);
+  if (!tpl) return;
+  editingTemplate = id;
+  document.getElementById('t-name').value     = tpl.name;
+  document.getElementById('t-category').value = tpl.category;
+  document.getElementById('t-lang').value      = tpl.lang;
+  document.getElementById('t-id').value        = tpl.id;
+  document.getElementById('t-body').value      = tpl.body;
+  updateBuilderPreview(); countBuilderChars();
+  showPage('builder', null);
+}
+
+function deleteTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  templates = templates.filter(t => t.id !== id);
+  saveTemplates();
+  renderTemplates();
+  toast('Template deleted.');
+}
+
+// ─────────────────────────────────────────────────────
+// TEMPLATE PICKER
+// ─────────────────────────────────────────────────────
+function openTemplatePickerFor(target) {
+  templatePickerTarget = target;
+  document.getElementById('tpSearch').value = '';
+  renderTemplatePicker();
+  openModal('templatePickerModal');
+}
+
+function renderTemplatePicker() {
+  const q = (document.getElementById('tpSearch').value || '').toLowerCase();
+  const filtered = templates.filter(t =>
+    t.name.toLowerCase().includes(q) || catLabel(t.category).toLowerCase().includes(q)
+  );
+  const list = document.getElementById('templatePickerList');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="emptyState"><div class="emptyIcon">📋</div><p>No templates found.</p></div>';
+    return;
+  }
+  list.innerHTML = filtered.map(t => `
+    <div class="templateBox" style="cursor:pointer" onclick="pickTemplate('${t.id}')">
+      <div class="templateMeta">
+        <div class="templateName">${esc(t.name)}</div>
+        <span class="templateCategory cat-${t.category}">${catLabel(t.category)}</span>
+      </div>
+      <div class="templatePreview">${esc(t.body.slice(0, 120) + (t.body.length > 120 ? '…' : ''))}</div>
+    </div>
+  `).join('');
+}
+
+function pickTemplate(id) {
+  useTemplate(id, templatePickerTarget);
+  closeModal('templatePickerModal');
+}
+
+// ─────────────────────────────────────────────────────
+// TEMPLATE BUILDER
+// ─────────────────────────────────────────────────────
+function resetBuilder() {
+  editingTemplate = null;
+  document.getElementById('t-name').value     = '';
+  document.getElementById('t-category').value = 'invoice';
+  document.getElementById('t-lang').value      = 'en';
+  document.getElementById('t-id').value        = generateId('TPL');
+  document.getElementById('t-body').value      = '';
+  document.getElementById('builderPreview').innerHTML =
+    '<em style="color:#aaa;font-size:.82rem">Template preview will appear here…</em>';
+  document.getElementById('t-charCount').textContent = '0 / 1000';
+}
+
+function saveTemplate() {
+  const name = document.getElementById('t-name').value.trim();
+  const body = document.getElementById('t-body').value.trim();
+  if (!name || !body) { toast('Name and body are required.'); return; }
+
+  const tpl = {
+    id:       document.getElementById('t-id').value || generateId('TPL'),
+    name:     name,
+    category: document.getElementById('t-category').value,
+    lang:     document.getElementById('t-lang').value,
+    body:     body,
+  };
+
+  if (editingTemplate) {
+    templates = templates.map(t => t.id === editingTemplate ? tpl : t);
+    toast('Template updated.');
+  } else {
+    templates.unshift(tpl);
+    toast('Template saved. ✅');
+  }
+
+  saveTemplates();
+  populateTriggerTemplates();
+  resetBuilder();
+}
+
+// ─────────────────────────────────────────────────────
+// SCHEDULES
+// ─────────────────────────────────────────────────────
+function renderSchedules() {
+  const active = schedules.filter(s => s.active).length;
+  const today  = schedules.reduce((sum, s) => sum + (s.triggeredToday || 0), 0);
+  document.getElementById('sch-active').textContent = active;
+  document.getElementById('sch-today').textContent  = today;
+  document.getElementById('sch-total').textContent  = schedules.length;
+
+  const container = document.getElementById('schedulesList');
+  container.innerHTML = schedules.map(s => `
+    <div class="scheduleCard">
+      <div class="scheduleIcon">${s.icon}</div>
+      <div class="scheduleInfo">
+        <div class="scheduleName">${esc(s.name)}</div>
+        <div class="scheduleMeta">${esc(s.description)} &nbsp;·&nbsp; <strong>${esc(s.frequency)}</strong></div>
+      </div>
+      <div style="font-size:.8rem;color:var(--text-muted);margin-right:8px">
+        Today: <strong>${s.triggeredToday || 0}</strong>
+      </div>
+      <label class="scheduleToggle">
+        <input type="checkbox" ${s.active ? 'checked' : ''} onchange="toggleSchedule('${s.id}',this.checked)">
+        <span class="toggleSlider"></span>
+      </label>
+    </div>
+  `).join('');
+}
+
+function toggleSchedule(id, val) {
+  schedules = schedules.map(s => s.id === id ? { ...s, active: val } : s);
+  localStorage.setItem('ltx-wa-schedules', JSON.stringify(schedules));
+  renderSchedules();
+  toast(val ? 'Schedule enabled' : 'Schedule paused');
+}
+
+// ─────────────────────────────────────────────────────
+// TRIGGERS
+// ─────────────────────────────────────────────────────
+const EVENT_LABELS = {
+  deadline_3: 'Case Deadline in 3 days',
+  deadline_7: 'Case Deadline in 7 days',
+  invoice_overdue: 'Invoice Overdue',
+  invoice_due_3: 'Invoice Due in 3 days',
+  fbr_due_7: 'FBR Filing Due in 7 days',
+  fbr_notice_open: 'FBR Notice Still Open',
+  new_client: 'New Client Added',
+  case_status: 'Case Status Changed',
+};
+
+function renderTriggers() {
+  populateTriggerTemplates();
+  const container = document.getElementById('triggersList');
+  if (!triggers.length) {
+    container.innerHTML = `<div class="panel"><div class="panelBody">
+      <div class="emptyState"><div class="emptyIcon">⚡</div><p>No triggers yet. Create one to automate notifications.</p></div>
+    </div></div>`;
+    return;
+  }
+  container.innerHTML = triggers.map(tr => {
+    const tpl = templates.find(t => t.id === tr.template);
+    return `<div class="scheduleCard">
+      <div class="scheduleIcon">⚡</div>
+      <div class="scheduleInfo">
+        <div class="scheduleName">${esc(tr.name)}</div>
+        <div class="scheduleMeta">
+          Event: <strong>${EVENT_LABELS[tr.event] || tr.event}</strong>
+          &nbsp;·&nbsp; Template: <strong>${tpl ? esc(tpl.name) : 'None'}</strong>
+        </div>
+      </div>
+      <label class="scheduleToggle" style="margin-right:10px">
+        <input type="checkbox" ${tr.active ? 'checked' : ''} onchange="toggleTrigger('${tr.id}',this.checked)">
+        <span class="toggleSlider"></span>
+      </label>
+      <button class="btn btn-sm btn-danger" onclick="deleteTrigger('${tr.id}')">Del</button>
+    </div>`;
+  }).join('');
+}
+
+function populateTriggerTemplates() {
+  const sel = document.getElementById('tr-template');
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Select template —</option>';
+  templates.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id; opt.textContent = t.name;
+    sel.appendChild(opt);
+  });
+  if (cur) sel.value = cur;
+}
+
+function saveTrigger() {
+  const name     = document.getElementById('tr-name').value.trim();
+  const event    = document.getElementById('tr-event').value;
+  const template = document.getElementById('tr-template').value;
+  const active   = document.getElementById('tr-active').value === '1';
+  if (!name || !template) { toast('Name and template are required.'); return; }
+  triggers.push({ id: generateId('TRG'), name, event, template, active });
+  save();
+  renderTriggers();
+  closeModal('addTriggerModal');
+  document.getElementById('tr-name').value = '';
+  toast('Trigger created ⚡');
+}
+
+function toggleTrigger(id, val) {
+  triggers = triggers.map(t => t.id === id ? { ...t, active: val } : t);
+  save();
+  toast(val ? 'Trigger activated' : 'Trigger paused');
+}
+
+function deleteTrigger(id) {
+  if (!confirm('Delete this trigger?')) return;
+  triggers = triggers.filter(t => t.id !== id);
+  save();
+  renderTriggers();
+  toast('Trigger deleted.');
+}
+
+// ─────────────────────────────────────────────────────
+// LOG
+// ─────────────────────────────────────────────────────
+function renderLog() {
+  updateLogStats();
+  const tbody = document.getElementById('logTable');
+  if (!sendLog.length) {
+    tbody.innerHTML = `<tr><td colspan="6"><div class="emptyState"><div class="emptyIcon">📜</div><p>No messages sent yet.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = sendLog.map(entry => {
+    const statusCls = entry.status === 'Sent' ? 'badge-wa' : entry.status === 'Failed' ? 'badge-red' : 'badge-gold';
+    const date = new Date(entry.sentAt);
+    const dateStr = date.toLocaleDateString('en-GB', { day:'numeric', month:'short' }) + ' ' +
+                    date.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    return `<tr>
+      <td><strong>${esc(entry.recipient)}</strong></td>
+      <td style="font-family:'Courier Prime',monospace;font-size:.8rem">${esc(entry.phone || '—')}</td>
+      <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(entry.message)}</td>
+      <td style="font-size:.82rem;color:var(--text-muted)">${dateStr}</td>
+      <td><span class="badge ${statusCls}">${esc(entry.status)}</span></td>
+      <td>
+        <button class="btn btn-sm btn-outline" onclick="resend('${entry.id}')">Resend</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteLog('${entry.id}')">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateLogStats() {
+  document.getElementById('log-sent').textContent      = sendLog.length;
+  document.getElementById('log-delivered').textContent = sendLog.filter(l => l.status === 'Delivered').length;
+  document.getElementById('log-pending').textContent   = sendLog.filter(l => l.status === 'Sent').length;
+  document.getElementById('log-failed').textContent    = sendLog.filter(l => l.status === 'Failed').length;
+}
+
+function resend(id) {
+  const entry = sendLog.find(l => l.id === id);
+  if (!entry || !entry.phone) return;
+  const waNum = entry.phone.replace(/\D/g,'');
+  window.open('https://wa.me/' + waNum, '_blank');
+  toast('Opening WhatsApp…', 'wa');
+}
+
+function deleteLog(id) {
+  sendLog = sendLog.filter(l => l.id !== id);
+  save();
+  renderLog();
+}
+
+function clearLog() {
+  if (!confirm('Clear all send history?')) return;
+  sendLog = [];
+  save();
+  renderLog();
+  toast('Log cleared.');
+}
+
+function exportLog() {
+  if (!sendLog.length) { toast('No log entries to export.'); return; }
+  const rows = [
+    ['Recipient', 'Phone', 'Message', 'Sent At', 'Status'],
+    ...sendLog.map(l => [l.recipient, l.phone, l.message, l.sentAt, l.status])
+  ];
+  const csv = rows.map(r => r.map(c => '"' + String(c || '').replace(/"/g,'""') + '"').join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'lextax-wa-log-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  toast('Log exported as CSV.');
+}
+
+// ─────────────────────────────────────────────────────
+// IMPORT CRM DATA
+// ─────────────────────────────────────────────────────
+function importCRMData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const data = JSON.parse(r.result);
+      db.clients     = data.clients    || [];
+      db.cases       = data.cases      || [];
+      db.invoices    = data.invoices   || [];
+      db.fbrFilings  = data.fbrFilings || [];
+      db.fbrNotices  = data.fbrNotices || [];
+      localStorage.setItem('ltx-wa-clients',  JSON.stringify(db.clients));
+      localStorage.setItem('ltx-wa-cases',    JSON.stringify(db.cases));
+      localStorage.setItem('ltx-wa-invoices', JSON.stringify(db.invoices));
+      localStorage.setItem('ltx-wa-fbr',      JSON.stringify(db.fbrFilings));
+      localStorage.setItem('ltx-wa-notices',  JSON.stringify(db.fbrNotices));
+      populateClientSelect();
+      renderBulkList();
+      closeModal('importModal');
+      toast(`✅ Imported ${db.clients.length} clients successfully!`, 'wa');
+    } catch {
+      toast('Invalid backup file. Please use LexTax CRM export.');
+    }
+  };
+  r.readAsText(file);
+}
+
+// ─────────────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────────────
+function init() {
+  initTemplates();
+  initSchedules();
+  populateClientSelect();
+  renderTemplates();
+  renderLog();
+  renderBulkList();
+  renderSchedules();
+  renderTriggers();
+  updateLogStats();
+
+  // Set preview time
+  const t = document.getElementById('previewTime');
+  if (t) t.textContent = nowTime() + ' ✓✓';
+
+  // Generate builder ID
+  const bid = document.getElementById('t-id');
+  if (bid) bid.value = generateId('TPL');
+}
+
+init();
+</script>
+</body>
+</html>
